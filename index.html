@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitumen Shingle Calculator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Bitumen Shingle Calculator</h1>
+        
+        <div class="main-content">
+            <div class="config-panel">
+                <h2>Configuration</h2>
+                
+                <div class="config-section">
+                    <h3>Shingle Size</h3>
+                    <div class="input-group">
+                        <label for="shingleWidth">Width (mm):</label>
+                        <input type="number" id="shingleWidth" value="1000" min="100" max="5000" step="10">
+                    </div>
+                    <div class="input-group">
+                        <label for="shingleHeight">Height (mm):</label>
+                        <input type="number" id="shingleHeight" value="333" min="100" max="2000" step="10">
+                    </div>
+                </div>
+
+                <div class="config-section">
+                    <h3>Shingle Overlap</h3>
+                    <div class="input-group">
+                        <label for="overlapHeight">Vertical Overlap (mm):</label>
+                        <input type="number" id="overlapHeight" value="100" min="0" max="300" step="10">
+                    </div>
+                    <div class="input-group">
+                        <label for="offsetWidth">Horizontal Offset (mm):</label>
+                        <input type="number" id="offsetWidth" value="167" min="0" max="500" step="10">
+                    </div>
+                </div>
+
+                <div class="config-section">
+                    <h3>Roof Area</h3>
+                    <div class="input-group">
+                        <label for="roofWidth">Width (mm):</label>
+                        <input type="number" id="roofWidth" value="5000" min="500" max="50000" step="100">
+                    </div>
+                    <div class="input-group">
+                        <label for="roofHeight">Height (mm):</label>
+                        <input type="number" id="roofHeight" value="8000" min="500" max="50000" step="100">
+                    </div>
+                </div>
+
+                <button id="calculateBtn" class="calculate-btn">Calculate & Visualize</button>
+
+                <div class="results" id="results">
+                    <h3>Results</h3>
+                    <div class="result-item">
+                        <span class="result-label">Total Shingles Required:</span>
+                        <span class="result-value" id="totalShingles">-</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Rows Required:</span>
+                        <span class="result-value" id="rowsRequired">-</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Shingles per Row (avg):</span>
+                        <span class="result-value" id="shinglesPerRow">-</span>
+                    </div>
+                    <div class="result-item">
+                        <span class="result-label">Roof Area:</span>
+                        <span class="result-value" id="roofArea">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="visualization-panel">
+                <h2>Roof Visualization (Top View)</h2>
+                <div class="canvas-container">
+                    <canvas id="roofCanvas"></canvas>
+                </div>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #8B4513;"></div>
+                        <span>Shingles</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #D2691E;"></div>
+                        <span>Overlap Area</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="calculator.js"></script>
+</body>
+</html>

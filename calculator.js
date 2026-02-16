@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Also calculate on Enter key in any input
     document.querySelectorAll('input').forEach(function(input) {
         input.addEventListener('keypress', function(e) {
-            if (e.which === 13 || e.keyCode === 13) {
+            if (e.key === 'Enter') {
                 calculateAndVisualize();
             }
         });
@@ -83,6 +83,14 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function drawRoof(roofWidth, roofHeight, shingleWidth, shingleHeight, 
                       overlapHeight, offsetWidth, numRows) {
+        // Visual constants
+        const MAX_SCALE_FACTOR = 0.5; // Limit max scale to 50% for better visibility
+        const BASE_HUE = 20; // Brown hue for shingles
+        const COLOR_VARIANTS = 3; // Number of color variations
+        const HUE_STEP = 5; // Hue variation step
+        const LIGHTNESS_BASE = 35; // Base lightness for shingles
+        const LIGHTNESS_STEP = 5; // Lightness variation between rows
+        
         // Calculate scale to fit canvas
         const padding = 40;
         const maxCanvasWidth = canvas.width - (padding * 2);
@@ -90,7 +98,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const scaleX = maxCanvasWidth / roofWidth;
         const scaleY = maxCanvasHeight / roofHeight;
-        const scale = Math.min(scaleX, scaleY, 0.5); // Limit max scale to 0.5
+        const scale = Math.min(scaleX, scaleY, MAX_SCALE_FACTOR);
         
         // Scaled dimensions
         const scaledRoofWidth = roofWidth * scale;
@@ -136,8 +144,8 @@ document.addEventListener('DOMContentLoaded', function() {
             let shingleIndex = 0;
             while (currentX < offsetX + scaledRoofWidth) {
                 // Determine colors based on position
-                const hue = 20 + (shingleIndex % 3) * 5; // Slight variation in brown tones
-                const lightness = 35 + (rowIndex % 2) * 5; // Alternate row brightness
+                const hue = BASE_HUE + (shingleIndex % COLOR_VARIANTS) * HUE_STEP;
+                const lightness = LIGHTNESS_BASE + (rowIndex % 2) * LIGHTNESS_STEP;
                 
                 // Main shingle body
                 const shingleX = Math.max(currentX, offsetX);

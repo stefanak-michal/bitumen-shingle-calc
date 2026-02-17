@@ -201,7 +201,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         
                         for (let t = 1; t < 4; t++) {
                             const tabX = currentX + (tabWidth * t);
-                            if (tabX >= offsetX && tabX <= offsetX + scaledRoofWidth) {
+                            if (tabX >= offsetX && tabX < offsetX + scaledRoofWidth) {
                                 ctx.beginPath();
                                 ctx.moveTo(tabX, shingleY + shingleDrawHeight - tabDepth);
                                 ctx.lineTo(tabX, Math.min(shingleY + shingleDrawHeight, 

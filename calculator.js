@@ -62,19 +62,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const numRows = 1 + additionalRows;
         
         // Calculate shingles per row (considering offset pattern)
-        // For alternating rows, we need to account for offset
         let totalShingles = 0;
         const shinglesPerFullRow = Math.ceil(roofWidth / shingleWidth);
         
         for (let row = 0; row < numRows; row++) {
-            if (row % 2 === 0) {
-                // Even rows - full coverage
-                totalShingles += shinglesPerFullRow;
-            } else {
-                // Odd rows - offset, might need one extra shingle
-                const offsetShingles = Math.ceil((roofWidth + offsetWidth) / shingleWidth);
-                totalShingles += offsetShingles;
-            }
+            // All rows use the same number of shingles
+            // For offset rows, one shingle is cut - one part at beginning, other at end
+            totalShingles += shinglesPerFullRow;
         }
         
         // Calculate roof area in square meters
@@ -271,11 +265,6 @@ document.addEventListener('DOMContentLoaded', function() {
             
             cumulativeExposedHeight += exposedHeight;
             rowIndex++;
-            
-            // Safety check to prevent infinite loop
-            if (cumulativeExposedHeight >= scaledRoofHeight) {
-                break;
-            }
         }
         
         // Draw scale indicator

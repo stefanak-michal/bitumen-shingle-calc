@@ -29,13 +29,15 @@ document.addEventListener('DOMContentLoaded', function() {
         const shingleWidth = parseFloat(document.getElementById('shingleWidth').value);
         const shingleHeight = parseFloat(document.getElementById('shingleHeight').value);
         const overlapHeight = parseFloat(document.getElementById('overlapHeight').value);
-        const offsetWidth = parseFloat(document.getElementById('offsetWidth').value);
         const roofWidth = parseFloat(document.getElementById('roofWidth').value);
         const roofHeight = parseFloat(document.getElementById('roofHeight').value);
         
+        // Calculate horizontal offset automatically as half of shingle height
+        const offsetWidth = shingleHeight / 2;
+        
         // Validate inputs
         if (isNaN(shingleWidth) || isNaN(shingleHeight) || isNaN(overlapHeight) || 
-            isNaN(offsetWidth) || isNaN(roofWidth) || isNaN(roofHeight)) {
+            isNaN(roofWidth) || isNaN(roofHeight)) {
             alert('Please enter valid numbers for all fields');
             return;
         }
@@ -48,8 +50,14 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
         
+        // Calculate bottom row height (half shingle height)
+        const bottomRowHeight = shingleHeight / 2;
+        
         // Calculate number of rows needed
-        const numRows = Math.ceil(roofHeight / effectiveShingleHeight);
+        // First row uses half height, then we need rows for remaining height
+        const remainingHeight = roofHeight - bottomRowHeight;
+        const additionalRows = Math.ceil(remainingHeight / effectiveShingleHeight);
+        const numRows = 1 + additionalRows;
         
         // Calculate shingles per row (considering offset pattern)
         // For alternating rows, we need to account for offset
@@ -106,6 +114,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const scaledOverlapHeight = overlapHeight * scale;
         const scaledOffsetWidth = offsetWidth * scale;
         const effectiveShingleHeight = scaledShingleHeight - scaledOverlapHeight;
+        const bottomRowHeight = scaledShingleHeight / 2;
         
         // Center the drawing
         const offsetX = (canvas.width - scaledRoofWidth) / 2;
@@ -125,23 +134,48 @@ document.addEventListener('DOMContentLoaded', function() {
         ctx.lineWidth = 2;
         ctx.strokeRect(offsetX, offsetY, scaledRoofWidth, scaledRoofHeight);
         
-        // Draw shingles row by row
-        let currentY = offsetY;
+        // Draw shingles from bottom to top
         let rowIndex = 0;
+        let cumulativeExposedHeight = 0;
         
-        while (currentY < offsetY + scaledRoofHeight) {
+        while (rowIndex < numRows) {
+            const isBottomRow = rowIndex === 0;
             const isEvenRow = rowIndex % 2 === 0;
+            
+            // Calculate row height and position
+            let rowHeight, exposedHeight;
+            if (isBottomRow) {
+                // Bottom row: half shingle height (top half is used)
+                rowHeight = bottomRowHeight;
+                exposedHeight = bottomRowHeight;
+            } else {
+                // Regular rows: full shingle height
+                rowHeight = scaledShingleHeight;
+                exposedHeight = effectiveShingleHeight;
+                
+                // Check if this is the last row and adjust if needed
+                const remainingSpace = scaledRoofHeight - cumulativeExposedHeight;
+                if (remainingSpace < effectiveShingleHeight) {
+                    // Last row - cut to fit
+                    exposedHeight = remainingSpace;
+                    rowHeight = Math.min(scaledShingleHeight, remainingSpace);
+                }
+            }
+            
+            // Y position (from bottom of roof, moving up)
+            const currentY = offsetY + scaledRoofHeight - cumulativeExposedHeight - rowHeight;
+            
+            // Draw shingles in this row
             let currentX = offsetX;
             
-            // Apply offset for odd rows
+            // Apply horizontal offset for odd rows
             if (!isEvenRow) {
                 currentX -= scaledOffsetWidth;
             }
             
-            // Draw shingles in this row
             let shingleIndex = 0;
             while (currentX < offsetX + scaledRoofWidth) {
-                // Main shingle body
+                // Calculate visible portion of shingle
                 const shingleX = Math.max(currentX, offsetX);
                 const shingleY = Math.max(currentY, offsetY);
                 const shingleDrawWidth = Math.min(
@@ -149,35 +183,40 @@ document.addEventListener('DOMContentLoaded', function() {
                     offsetX + scaledRoofWidth - shingleX
                 );
                 const shingleDrawHeight = Math.min(
-                    scaledShingleHeight,
+                    rowHeight,
                     offsetY + scaledRoofHeight - shingleY
                 );
                 
                 if (shingleDrawWidth > 0 && shingleDrawHeight > 0) {
-                    // Draw shingle border (wireframe style - no fill)
+                    // Draw shingle outline
                     ctx.strokeStyle = BORDER_COLOR;
                     ctx.lineWidth = SHINGLE_BORDER_WIDTH;
                     ctx.strokeRect(shingleX, shingleY, shingleDrawWidth, shingleDrawHeight);
                     
-                    // Draw overlap line if not first row
-                    if (rowIndex > 0 && shingleDrawHeight > scaledOverlapHeight) {
-                        ctx.beginPath();
-                        ctx.moveTo(shingleX, shingleY + scaledOverlapHeight);
-                        ctx.lineTo(shingleX + shingleDrawWidth, shingleY + scaledOverlapHeight);
-                        ctx.strokeStyle = BORDER_COLOR;
-                        ctx.lineWidth = TAB_LINE_WIDTH;
-                        ctx.stroke();
-                    }
-                    
-                    // Draw tab lines (simulate 4-tab shingle)
-                    const tabWidth = scaledShingleWidth / 4;
-                    for (let t = 1; t < 4; t++) {
-                        const tabX = currentX + (tabWidth * t);
-                        if (tabX > offsetX && tabX < offsetX + scaledRoofWidth) {
+                    // Draw tab lines (4-tab shingle) - but NOT on bottom starter row
+                    if (!isBottomRow) {
+                        const tabWidth = scaledShingleWidth / 4;
+                        // Calculate how much of the shingle is visible (for tab depth)
+                        const tabDepth = Math.min(scaledShingleHeight / 2, shingleDrawHeight);
+                        
+                        for (let t = 1; t < 4; t++) {
+                            const tabX = currentX + (tabWidth * t);
+                            if (tabX >= offsetX && tabX <= offsetX + scaledRoofWidth) {
+                                ctx.beginPath();
+                                ctx.moveTo(tabX, shingleY + shingleDrawHeight - tabDepth);
+                                ctx.lineTo(tabX, Math.min(shingleY + shingleDrawHeight, 
+                                                          offsetY + scaledRoofHeight));
+                                ctx.strokeStyle = BORDER_COLOR;
+                                ctx.lineWidth = TAB_LINE_WIDTH;
+                                ctx.stroke();
+                            }
+                        }
+                        
+                        // Draw horizontal line at tab cut depth
+                        if (shingleDrawHeight >= tabDepth) {
                             ctx.beginPath();
-                            ctx.moveTo(tabX, shingleY);
-                            ctx.lineTo(tabX, Math.min(shingleY + shingleDrawHeight, 
-                                                      offsetY + scaledRoofHeight));
+                            ctx.moveTo(shingleX, shingleY + shingleDrawHeight - tabDepth);
+                            ctx.lineTo(shingleX + shingleDrawWidth, shingleY + shingleDrawHeight - tabDepth);
                             ctx.strokeStyle = BORDER_COLOR;
                             ctx.lineWidth = TAB_LINE_WIDTH;
                             ctx.stroke();
@@ -189,8 +228,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 shingleIndex++;
             }
             
-            currentY += effectiveShingleHeight;
+            cumulativeExposedHeight += exposedHeight;
             rowIndex++;
+            
+            // Safety check to prevent infinite loop
+            if (cumulativeExposedHeight >= scaledRoofHeight) {
+                break;
+            }
         }
         
         // Draw scale indicator

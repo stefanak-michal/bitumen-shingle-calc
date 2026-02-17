@@ -175,18 +175,21 @@ document.addEventListener('DOMContentLoaded', function() {
                     ctx.lineWidth = 1.5;
                     ctx.strokeRect(shingleX, shingleY, shingleDrawWidth, shingleDrawHeight);
                     
-                    // Draw tab lines (simulate 3-tab or 4-tab shingle pattern)
-                    const tabWidth = scaledShingleWidth / 3;
-                    for (let t = 1; t < 3; t++) {
-                        const tabX = currentX + (tabWidth * t);
-                        if (tabX > offsetX && tabX < offsetX + scaledRoofWidth) {
-                            ctx.beginPath();
-                            ctx.moveTo(tabX, shingleY);
-                            ctx.lineTo(tabX, Math.min(shingleY + shingleDrawHeight, 
-                                                      offsetY + scaledRoofHeight));
-                            ctx.strokeStyle = '#000';
-                            ctx.lineWidth = 1;
-                            ctx.stroke();
+                    // Draw tab lines (simulate 3-tab shingle pattern) - but NOT on bottom row (starter course)
+                    // Bottom row uses top half of shingle which is solid (no tabs)
+                    if (!isBottomRow) {
+                        const tabWidth = scaledShingleWidth / 3;
+                        for (let t = 1; t < 3; t++) {
+                            const tabX = currentX + (tabWidth * t);
+                            if (tabX > offsetX && tabX < offsetX + scaledRoofWidth) {
+                                ctx.beginPath();
+                                ctx.moveTo(tabX, shingleY);
+                                ctx.lineTo(tabX, Math.min(shingleY + shingleDrawHeight, 
+                                                          offsetY + scaledRoofHeight));
+                                ctx.strokeStyle = '#000';
+                                ctx.lineWidth = 1;
+                                ctx.stroke();
+                            }
                         }
                     }
                     

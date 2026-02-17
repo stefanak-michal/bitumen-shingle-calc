@@ -49,9 +49,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         
         // Calculate number of rows needed
-        // First row uses only half the shingle height (bottom half, top is cut off)
-        const firstRowHeight = shingleHeight / 2;
-        const remainingHeight = roofHeight - firstRowHeight;
+        // Bottom row (first row at eaves) uses only half the shingle height (bottom half cut off, top half kept)
+        const bottomRowHeight = shingleHeight / 2;
+        const remainingHeight = roofHeight - bottomRowHeight;
         const numRows = 1 + Math.ceil(remainingHeight / effectiveShingleHeight);
         
         // Calculate shingles per row (considering offset pattern)
@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const scaledOverlapHeight = overlapHeight * scale;
         const scaledOffsetWidth = offsetWidth * scale;
         const effectiveShingleHeight = scaledShingleHeight - scaledOverlapHeight;
-        const firstRowHeight = scaledShingleHeight / 2;
+        const bottomRowHeight = scaledShingleHeight / 2;
         
         // Center the drawing
         const offsetX = (canvas.width - scaledRoofWidth) / 2;
@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Draw shingles row by row with wireframe style
         for (let rowIndex = 0; rowIndex < numRows; rowIndex++) {
             const isEvenRow = rowIndex % 2 === 0;
-            const isFirstRow = rowIndex === 0;
+            const isBottomRow = rowIndex === numRows - 1; // Bottom row (at eaves) is half height
             let currentX = offsetX;
             
             // Apply offset for odd rows
@@ -138,17 +138,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 currentX -= scaledOffsetWidth;
             }
             
-            // Determine row height (first row is half height)
-            const rowHeight = isFirstRow ? firstRowHeight : scaledShingleHeight;
+            // Determine row height (bottom row is half height)
+            const rowHeight = isBottomRow ? bottomRowHeight : scaledShingleHeight;
             
             // Calculate Y position for this row
             let currentY = offsetY;
             if (rowIndex === 0) {
+                // First row at top
                 currentY = offsetY;
-            } else if (rowIndex === 1) {
-                currentY = offsetY + firstRowHeight;
+            } else if (isBottomRow) {
+                // Bottom row (last row) - calculate from bottom up
+                currentY = offsetY + scaledRoofHeight - bottomRowHeight;
             } else {
-                currentY = offsetY + firstRowHeight + (rowIndex - 1) * effectiveShingleHeight;
+                // Regular rows in between
+                currentY = offsetY + rowIndex * effectiveShingleHeight;
             }
             
             // Draw shingles in this row
@@ -187,8 +190,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                     }
                     
-                    // Draw horizontal line at overlap boundary for non-first rows
-                    if (!isFirstRow && shingleDrawHeight > scaledOverlapHeight) {
+                    // Draw horizontal line at overlap boundary for non-bottom rows
+                    if (!isBottomRow && shingleDrawHeight > scaledOverlapHeight) {
                         ctx.beginPath();
                         ctx.moveTo(shingleX, shingleY + scaledOverlapHeight);
                         ctx.lineTo(shingleX + shingleDrawWidth, shingleY + scaledOverlapHeight);

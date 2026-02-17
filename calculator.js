@@ -85,6 +85,9 @@ document.addEventListener('DOMContentLoaded', function() {
                       overlapHeight, offsetWidth, numRows) {
         // Visual constants
         const MAX_SCALE_FACTOR = 0.5; // Limit max scale to 50% for better visibility
+        const SHINGLE_BORDER_WIDTH = 1; // Border line width for shingle outlines
+        const TAB_LINE_WIDTH = 0.5; // Line width for tab divisions and overlap lines
+        const BORDER_COLOR = '#000'; // Black color for all outlines
         
         // Calculate scale to fit canvas
         const padding = 40;
@@ -152,8 +155,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 if (shingleDrawWidth > 0 && shingleDrawHeight > 0) {
                     // Draw shingle border (wireframe style - no fill)
-                    ctx.strokeStyle = '#000';
-                    ctx.lineWidth = 1;
+                    ctx.strokeStyle = BORDER_COLOR;
+                    ctx.lineWidth = SHINGLE_BORDER_WIDTH;
                     ctx.strokeRect(shingleX, shingleY, shingleDrawWidth, shingleDrawHeight);
                     
                     // Draw overlap line if not first row
@@ -161,8 +164,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         ctx.beginPath();
                         ctx.moveTo(shingleX, shingleY + scaledOverlapHeight);
                         ctx.lineTo(shingleX + shingleDrawWidth, shingleY + scaledOverlapHeight);
-                        ctx.strokeStyle = '#000';
-                        ctx.lineWidth = 0.5;
+                        ctx.strokeStyle = BORDER_COLOR;
+                        ctx.lineWidth = TAB_LINE_WIDTH;
                         ctx.stroke();
                     }
                     
@@ -175,8 +178,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             ctx.moveTo(tabX, shingleY);
                             ctx.lineTo(tabX, Math.min(shingleY + shingleDrawHeight, 
                                                       offsetY + scaledRoofHeight));
-                            ctx.strokeStyle = '#000';
-                            ctx.lineWidth = 0.5;
+                            ctx.strokeStyle = BORDER_COLOR;
+                            ctx.lineWidth = TAB_LINE_WIDTH;
                             ctx.stroke();
                         }
                     }

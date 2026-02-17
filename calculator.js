@@ -177,52 +177,91 @@ document.addEventListener('DOMContentLoaded', function() {
             
             let shingleIndex = 0;
             while (currentX < offsetX + scaledRoofWidth) {
-                // Calculate visible portion of shingle
+                // Calculate visible portion of shingle (only the exposed part)
                 const shingleX = Math.max(currentX, offsetX);
-                const shingleY = Math.max(currentY, offsetY);
+                const visibleY = offsetY + scaledRoofHeight - cumulativeExposedHeight;
                 const shingleDrawWidth = Math.min(
                     scaledShingleWidth - (shingleX - currentX),
                     offsetX + scaledRoofWidth - shingleX
                 );
                 const shingleDrawHeight = Math.min(
-                    rowHeight,
-                    offsetY + scaledRoofHeight - shingleY
+                    exposedHeight,
+                    offsetY + scaledRoofHeight - visibleY
                 );
                 
                 if (shingleDrawWidth > 0 && shingleDrawHeight > 0) {
-                    // Draw shingle outline
                     ctx.strokeStyle = BORDER_COLOR;
                     ctx.lineWidth = SHINGLE_BORDER_WIDTH;
-                    ctx.strokeRect(shingleX, shingleY, shingleDrawWidth, shingleDrawHeight);
                     
-                    // Draw tab lines (4-tab shingle) - but NOT on bottom starter row
+                    // Draw shingles with tab shapes - but NOT on bottom starter row
                     if (!isBottomRow) {
                         const tabWidth = scaledShingleWidth / 4;
-                        // Calculate how much of the shingle is visible (for tab depth)
-                        const tabDepth = Math.min(scaledShingleHeight / 2, shingleDrawHeight);
+                        // Tab depth is approximately 1/3 of shingle height (based on reference image)
+                        const tabDepth = scaledShingleHeight / 3;
                         
-                        for (let t = 1; t < 4; t++) {
-                            const tabX = currentX + (tabWidth * t);
-                            if (tabX >= offsetX && tabX < offsetX + scaledRoofWidth) {
-                                ctx.beginPath();
-                                ctx.moveTo(tabX, shingleY + shingleDrawHeight - tabDepth);
-                                ctx.lineTo(tabX, Math.min(shingleY + shingleDrawHeight, 
-                                                          offsetY + scaledRoofHeight));
-                                ctx.strokeStyle = BORDER_COLOR;
-                                ctx.lineWidth = TAB_LINE_WIDTH;
-                                ctx.stroke();
-                            }
-                        }
-                        
-                        // Draw horizontal line at tab cut depth
-                        if (shingleDrawHeight >= tabDepth) {
+                        // Only draw tabs if they're visible (not covered by overlap)
+                        if (shingleDrawHeight > tabDepth) {
+                            // Draw the shingle outline with tab cutouts
                             ctx.beginPath();
-                            ctx.moveTo(shingleX, shingleY + shingleDrawHeight - tabDepth);
-                            ctx.lineTo(shingleX + shingleDrawWidth, shingleY + shingleDrawHeight - tabDepth);
-                            ctx.strokeStyle = BORDER_COLOR;
-                            ctx.lineWidth = TAB_LINE_WIDTH;
+                            
+                            // Start from top-left corner
+                            ctx.moveTo(shingleX, visibleY);
+                            
+                            // Top edge to top-right
+                            ctx.lineTo(shingleX + shingleDrawWidth, visibleY);
+                            
+                            // Right edge down to where tabs start
+                            const tabStartY = visibleY + (shingleDrawHeight - tabDepth);
+                            ctx.lineTo(shingleX + shingleDrawWidth, tabStartY);
+                            
+                            // Draw the tab cutouts from right to left
+                            for (let t = 3; t >= 0; t--) {
+                                const tabLeftX = currentX + (tabWidth * t);
+                                const tabRightX = currentX + (tabWidth * (t + 1));
+                                
+                                // Only draw this tab if it's within the visible area
+                                if (tabRightX > shingleX && tabLeftX < shingleX + shingleDrawWidth) {
+                                    const clippedTabRight = Math.min(tabRightX, shingleX + shingleDrawWidth);
+                                    const clippedTabLeft = Math.max(tabLeftX, shingleX);
+                                    
+                                    // Horizontal line at top of tab
+                                    if (clippedTabRight > shingleX) {
+                                        ctx.lineTo(clippedTabRight, tabStartY);
+                                    }
+                                    
+                                    // Vertical line down (right side of tab slot)
+                                    if (tabRightX > shingleX && tabRightX <= shingleX + shingleDrawWidth) {
+                                        ctx.lineTo(tabRightX, visibleY + shingleDrawHeight);
+                                    } else if (clippedTabRight > shingleX) {
+                                        ctx.lineTo(clippedTabRight, visibleY + shingleDrawHeight);
+                                    }
+                                    
+                                    // Horizontal line at bottom (bottom of tab)
+                                    if (clippedTabLeft >= shingleX) {
+                                        ctx.lineTo(clippedTabLeft, visibleY + shingleDrawHeight);
+                                    }
+                                    
+                                    // Vertical line up (left side of tab slot)
+                                    if (tabLeftX >= shingleX && tabLeftX < shingleX + shingleDrawWidth) {
+                                        ctx.lineTo(tabLeftX, tabStartY);
+                                    } else if (clippedTabLeft < shingleX + shingleDrawWidth) {
+                                        ctx.lineTo(clippedTabLeft, tabStartY);
+                                    }
+                                }
+                            }
+                            
+                            // Left edge back to start
+                            ctx.lineTo(shingleX, tabStartY);
+                            ctx.lineTo(shingleX, visibleY);
+                            
                             ctx.stroke();
+                        } else {
+                            // If tabs aren't visible, just draw a rectangle
+                            ctx.strokeRect(shingleX, visibleY, shingleDrawWidth, shingleDrawHeight);
                         }
+                    } else {
+                        // Bottom row: simple rectangle (no tabs)
+                        ctx.strokeRect(shingleX, visibleY, shingleDrawWidth, shingleDrawHeight);
                     }
                 }
                 

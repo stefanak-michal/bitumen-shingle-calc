@@ -191,6 +191,11 @@ h3 {
     border-radius: 3px;
 }
 
+.legend-line {
+    height: 20px;
+    display: inline-block;
+}
+
 @media (max-width: 768px) {
     .main-content {
         flex-direction: column;

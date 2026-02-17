@@ -85,11 +85,6 @@ document.addEventListener('DOMContentLoaded', function() {
                       overlapHeight, offsetWidth, numRows) {
         // Visual constants
         const MAX_SCALE_FACTOR = 0.5; // Limit max scale to 50% for better visibility
-        const BASE_HUE = 20; // Brown hue for shingles
-        const COLOR_VARIANTS = 3; // Number of color variations
-        const HUE_STEP = 5; // Hue variation step
-        const LIGHTNESS_BASE = 35; // Base lightness for shingles
-        const LIGHTNESS_STEP = 5; // Lightness variation between rows
         
         // Calculate scale to fit canvas
         const padding = 40;
@@ -143,10 +138,6 @@ document.addEventListener('DOMContentLoaded', function() {
             // Draw shingles in this row
             let shingleIndex = 0;
             while (currentX < offsetX + scaledRoofWidth) {
-                // Determine colors based on position
-                const hue = BASE_HUE + (shingleIndex % COLOR_VARIANTS) * HUE_STEP;
-                const lightness = LIGHTNESS_BASE + (rowIndex % 2) * LIGHTNESS_STEP;
-                
                 // Main shingle body
                 const shingleX = Math.max(currentX, offsetX);
                 const shingleY = Math.max(currentY, offsetY);
@@ -160,32 +151,31 @@ document.addEventListener('DOMContentLoaded', function() {
                 );
                 
                 if (shingleDrawWidth > 0 && shingleDrawHeight > 0) {
-                    // Draw shingle body
-                    ctx.fillStyle = `hsl(${hue}, 40%, ${lightness}%)`;
-                    ctx.fillRect(shingleX, shingleY, shingleDrawWidth, shingleDrawHeight);
-                    
-                    // Draw overlap area (darker)
-                    if (rowIndex > 0 && shingleDrawHeight > scaledOverlapHeight) {
-                        ctx.fillStyle = `hsl(${hue}, 40%, ${lightness - 10}%)`;
-                        ctx.fillRect(shingleX, shingleY, shingleDrawWidth, 
-                                   Math.min(scaledOverlapHeight, shingleDrawHeight));
-                    }
-                    
-                    // Draw shingle border
+                    // Draw shingle border (wireframe style - no fill)
                     ctx.strokeStyle = '#000';
-                    ctx.lineWidth = 0.5;
+                    ctx.lineWidth = 1;
                     ctx.strokeRect(shingleX, shingleY, shingleDrawWidth, shingleDrawHeight);
                     
-                    // Draw tab lines (simulate 3-tab shingle)
-                    const tabWidth = scaledShingleWidth / 3;
-                    for (let t = 1; t < 3; t++) {
+                    // Draw overlap line if not first row
+                    if (rowIndex > 0 && shingleDrawHeight > scaledOverlapHeight) {
+                        ctx.beginPath();
+                        ctx.moveTo(shingleX, shingleY + scaledOverlapHeight);
+                        ctx.lineTo(shingleX + shingleDrawWidth, shingleY + scaledOverlapHeight);
+                        ctx.strokeStyle = '#000';
+                        ctx.lineWidth = 0.5;
+                        ctx.stroke();
+                    }
+                    
+                    // Draw tab lines (simulate 4-tab shingle)
+                    const tabWidth = scaledShingleWidth / 4;
+                    for (let t = 1; t < 4; t++) {
                         const tabX = currentX + (tabWidth * t);
                         if (tabX > offsetX && tabX < offsetX + scaledRoofWidth) {
                             ctx.beginPath();
                             ctx.moveTo(tabX, shingleY);
                             ctx.lineTo(tabX, Math.min(shingleY + shingleDrawHeight, 
                                                       offsetY + scaledRoofHeight));
-                            ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+                            ctx.strokeStyle = '#000';
                             ctx.lineWidth = 0.5;
                             ctx.stroke();
                         }

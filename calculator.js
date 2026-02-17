@@ -147,20 +147,27 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (isBottomRow) {
                 // Bottom row at eaves - uses half shingle height (solid top half)
-                // It is overlapped by the next row, so only the bottom portion is visible
+                // Positioned at very bottom, will be overlapped by second row
                 currentY = offsetY + scaledRoofHeight - bottomRowHeight;
-                visibleHeight = Math.max(0, bottomRowHeight - scaledOverlapHeight);
+                visibleHeight = bottomRowHeight;
             } else if (isTopRow) {
                 // Top row starts at the very top of the roof and fills remaining space
                 currentY = offsetY;
                 // Calculate how much space is left from the top
                 const rowsFromBottom = numRows - 1;
-                const heightUsedByLowerRows = (bottomRowHeight - scaledOverlapHeight) + (rowsFromBottom - 1) * effectiveShingleHeight;
+                // Second row is at bottom (overlapping first), then rows go up by effectiveShingleHeight
+                const heightUsedByLowerRows = (rowsFromBottom - 1) * effectiveShingleHeight;
                 visibleHeight = Math.min(effectiveShingleHeight, scaledRoofHeight - heightUsedByLowerRows);
             } else {
-                // Regular rows in between - each shows the effective height (visible portion after overlap)
+                // Regular rows in between
                 const rowsFromBottom = numRows - 1 - rowIndex;
-                currentY = offsetY + scaledRoofHeight - (bottomRowHeight - scaledOverlapHeight) - (rowsFromBottom * effectiveShingleHeight);
+                if (rowIndex === numRows - 2) {
+                    // Second row from bottom - positioned at the very bottom, overlapping first row
+                    currentY = offsetY + scaledRoofHeight - effectiveShingleHeight;
+                } else {
+                    // Third row and beyond - positioned at effectiveShingleHeight intervals from second row
+                    currentY = offsetY + scaledRoofHeight - effectiveShingleHeight - ((rowsFromBottom - 1) * effectiveShingleHeight);
+                }
                 visibleHeight = effectiveShingleHeight;
             }
             

@@ -28,15 +28,17 @@ document.addEventListener('DOMContentLoaded', function() {
         // Get configuration values
         const shingleWidth = parseFloat(document.getElementById('shingleWidth').value);
         const shingleHeight = parseFloat(document.getElementById('shingleHeight').value);
-        const overlapHeight = parseFloat(document.getElementById('overlapHeight').value);
         const roofWidth = parseFloat(document.getElementById('roofWidth').value);
         const roofHeight = parseFloat(document.getElementById('roofHeight').value);
         
-        // Calculate horizontal offset automatically as half of shingle height
-        const offsetWidth = shingleHeight / 2;
+        // Calculate overlap height automatically as half of shingle height
+        const overlapHeight = shingleHeight / 2;
+        
+        // Calculate horizontal offset automatically as 37% of shingle width
+        const offsetWidth = shingleWidth * 0.37;
         
         // Validate inputs
-        if (isNaN(shingleWidth) || isNaN(shingleHeight) || isNaN(overlapHeight) || 
+        if (isNaN(shingleWidth) || isNaN(shingleHeight) || 
             isNaN(roofWidth) || isNaN(roofHeight)) {
             alert('Please enter valid numbers for all fields');
             return;

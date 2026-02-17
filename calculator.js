@@ -146,7 +146,7 @@ document.addEventListener('DOMContentLoaded', function() {
             let visibleHeight;
             
             if (isBottomRow) {
-                // Bottom row at eaves
+                // Bottom row at eaves - uses half shingle height (solid top half)
                 currentY = offsetY + scaledRoofHeight - bottomRowHeight;
                 visibleHeight = bottomRowHeight;
             } else if (isTopRow) {
@@ -154,13 +154,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 currentY = offsetY;
                 // Calculate how much space is left from the top
                 const rowsFromBottom = numRows - 1;
-                const heightUsedByLowerRows = bottomRowHeight + (rowsFromBottom - 1) * bottomRowHeight;
-                visibleHeight = Math.min(bottomRowHeight, scaledRoofHeight - heightUsedByLowerRows);
+                const heightUsedByLowerRows = bottomRowHeight + (rowsFromBottom - 1) * effectiveShingleHeight;
+                visibleHeight = Math.min(effectiveShingleHeight, scaledRoofHeight - heightUsedByLowerRows);
             } else {
-                // Regular rows in between
+                // Regular rows in between - each shows the effective height (visible portion after overlap)
                 const rowsFromBottom = numRows - 1 - rowIndex;
-                currentY = offsetY + scaledRoofHeight - bottomRowHeight - (rowsFromBottom * bottomRowHeight);
-                visibleHeight = bottomRowHeight;
+                currentY = offsetY + scaledRoofHeight - bottomRowHeight - (rowsFromBottom * effectiveShingleHeight);
+                visibleHeight = effectiveShingleHeight;
             }
             
             // Draw shingles in this row

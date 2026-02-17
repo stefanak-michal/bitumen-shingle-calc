@@ -128,10 +128,7 @@ document.addEventListener('DOMContentLoaded', function() {
         ctx.strokeRect(offsetX, offsetY, scaledRoofWidth, scaledRoofHeight);
         
         // Draw shingles row by row with wireframe style
-        let currentY = offsetY;
-        let rowIndex = 0;
-        
-        while (currentY < offsetY + scaledRoofHeight && rowIndex < numRows) {
+        for (let rowIndex = 0; rowIndex < numRows; rowIndex++) {
             const isEvenRow = rowIndex % 2 === 0;
             const isFirstRow = rowIndex === 0;
             let currentX = offsetX;
@@ -143,6 +140,16 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Determine row height (first row is half height)
             const rowHeight = isFirstRow ? firstRowHeight : scaledShingleHeight;
+            
+            // Calculate Y position for this row
+            let currentY = offsetY;
+            if (rowIndex === 0) {
+                currentY = offsetY;
+            } else if (rowIndex === 1) {
+                currentY = offsetY + firstRowHeight;
+            } else {
+                currentY = offsetY + firstRowHeight + (rowIndex - 1) * effectiveShingleHeight;
+            }
             
             // Draw shingles in this row
             let shingleIndex = 0;
@@ -181,7 +188,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                     
                     // Draw horizontal line at overlap boundary for non-first rows
-                    if (!isFirstRow && rowIndex > 0 && shingleDrawHeight > scaledOverlapHeight) {
+                    if (!isFirstRow && shingleDrawHeight > scaledOverlapHeight) {
                         ctx.beginPath();
                         ctx.moveTo(shingleX, shingleY + scaledOverlapHeight);
                         ctx.lineTo(shingleX + shingleDrawWidth, shingleY + scaledOverlapHeight);
@@ -194,14 +201,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 currentX += scaledShingleWidth;
                 shingleIndex++;
             }
-            
-            // Move to next row
-            if (isFirstRow) {
-                currentY += firstRowHeight;
-            } else {
-                currentY += effectiveShingleHeight;
-            }
-            rowIndex++;
         }
         
         // Draw scale indicator

@@ -145,30 +145,29 @@ document.addEventListener('DOMContentLoaded', function() {
             let currentY;
             let visibleHeight;
             
+            // Calculate cumulative exposed height from bottom
+            const rowsFromBottom = numRows - 1 - rowIndex;
+            
             if (isBottomRow) {
-                // Bottom row at eaves - uses half shingle height (solid top half)
-                // Positioned at very bottom, will be overlapped by second row
+                // Bottom row - half shingle height at very bottom
                 currentY = offsetY + scaledRoofHeight - bottomRowHeight;
                 visibleHeight = bottomRowHeight;
-            } else if (isTopRow) {
-                // Top row starts at the very top of the roof and fills remaining space
-                currentY = offsetY;
-                // Calculate how much space is left from the top
-                const rowsFromBottom = numRows - 1;
-                // Second row is at bottom (overlapping first), then rows go up by effectiveShingleHeight
-                const heightUsedByLowerRows = (rowsFromBottom - 1) * effectiveShingleHeight;
-                visibleHeight = Math.min(effectiveShingleHeight, scaledRoofHeight - heightUsedByLowerRows);
             } else {
-                // Regular rows in between
-                const rowsFromBottom = numRows - 1 - rowIndex;
-                if (rowIndex === numRows - 2) {
-                    // Second row from bottom - positioned at the very bottom, overlapping first row
-                    currentY = offsetY + scaledRoofHeight - effectiveShingleHeight;
+                // Regular rows - each row is positioned based on cumulative exposed height
+                // Row 1 (bottom) exposes: bottomRowHeight - scaledOverlapHeight
+                // Row 2+ each exposes: effectiveShingleHeight
+                const bottomExposed = bottomRowHeight - scaledOverlapHeight;
+                const cumulativeExposed = bottomExposed + rowsFromBottom * effectiveShingleHeight;
+                
+                if (isTopRow) {
+                    // Top row - fill remaining space
+                    currentY = offsetY;
+                    visibleHeight = Math.min(effectiveShingleHeight, scaledRoofHeight - (bottomExposed + (numRows - 2) * effectiveShingleHeight));
                 } else {
-                    // Third row and beyond - positioned at effectiveShingleHeight intervals from second row
-                    currentY = offsetY + scaledRoofHeight - effectiveShingleHeight - ((rowsFromBottom - 1) * effectiveShingleHeight);
+                    // Regular middle rows
+                    currentY = offsetY + scaledRoofHeight - cumulativeExposed - effectiveShingleHeight;
+                    visibleHeight = effectiveShingleHeight;
                 }
-                visibleHeight = effectiveShingleHeight;
             }
             
             // Draw shingles in this row

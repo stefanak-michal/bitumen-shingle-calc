@@ -200,7 +200,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         const tabDepth = scaledShingleHeight / 3;
                         
                         // Only draw tabs if they're visible (not covered by overlap)
-                        if (shingleDrawHeight > tabDepth) {
+                        if (shingleDrawHeight >= tabDepth) {
                             // Draw the shingle outline with tab cutouts
                             ctx.beginPath();
                             

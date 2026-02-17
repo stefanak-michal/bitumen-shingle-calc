@@ -128,7 +128,9 @@ document.addEventListener('DOMContentLoaded', function() {
         ctx.strokeRect(offsetX, offsetY, scaledRoofWidth, scaledRoofHeight);
         
         // Draw shingles row by row with wireframe style
-        for (let rowIndex = 0; rowIndex < numRows; rowIndex++) {
+        // Each row overlaps the previous by half the shingle height
+        // We draw from bottom to top, showing only the visible (exposed) portion of each shingle
+        for (let rowIndex = numRows - 1; rowIndex >= 0; rowIndex--) {
             const isEvenRow = rowIndex % 2 === 0;
             const isBottomRow = rowIndex === numRows - 1; // Bottom row (at eaves) is half height
             let currentX = offsetX;
@@ -138,21 +140,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 currentX -= scaledOffsetWidth;
             }
             
-            // Determine row height (bottom row is half height)
-            const rowHeight = isBottomRow ? bottomRowHeight : scaledShingleHeight;
-            
-            // Calculate Y position for this row
-            let currentY = offsetY;
-            if (rowIndex === 0) {
-                // First row at top
-                currentY = offsetY;
-            } else if (isBottomRow) {
-                // Bottom row (last row) - calculate from bottom up
+            // Calculate Y position for this row (building from bottom up)
+            let currentY;
+            if (isBottomRow) {
+                // Bottom row at eaves
                 currentY = offsetY + scaledRoofHeight - bottomRowHeight;
             } else {
-                // Regular rows in between
-                currentY = offsetY + rowIndex * effectiveShingleHeight;
+                // Each row overlaps previous by half shingle height
+                // Distance from bottom = bottomRowHeight + (numRows - 1 - rowIndex) * (shingleHeight / 2)
+                const rowsFromBottom = numRows - 1 - rowIndex;
+                currentY = offsetY + scaledRoofHeight - bottomRowHeight - (rowsFromBottom * bottomRowHeight);
             }
+            
+            // Visible height for this row
+            // Bottom row: full half height visible
+            // Other rows: only the exposed half is visible (bottom half with tabs)
+            const visibleHeight = isBottomRow ? bottomRowHeight : bottomRowHeight;
             
             // Draw shingles in this row
             let shingleIndex = 0;
@@ -165,7 +168,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     offsetX + scaledRoofWidth - shingleX
                 );
                 const shingleDrawHeight = Math.min(
-                    rowHeight,
+                    visibleHeight,
                     offsetY + scaledRoofHeight - shingleY
                 );
                 
@@ -191,16 +194,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                 ctx.stroke();
                             }
                         }
-                    }
-                    
-                    // Draw horizontal line at overlap boundary for non-bottom rows
-                    if (!isBottomRow && shingleDrawHeight > scaledOverlapHeight) {
-                        ctx.beginPath();
-                        ctx.moveTo(shingleX, shingleY + scaledOverlapHeight);
-                        ctx.lineTo(shingleX + shingleDrawWidth, shingleY + scaledOverlapHeight);
-                        ctx.strokeStyle = '#666';
-                        ctx.lineWidth = 0.5;
-                        ctx.stroke();
                     }
                 }
                 

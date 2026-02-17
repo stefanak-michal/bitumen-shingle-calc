@@ -133,6 +133,7 @@ document.addEventListener('DOMContentLoaded', function() {
         for (let rowIndex = numRows - 1; rowIndex >= 0; rowIndex--) {
             const isEvenRow = rowIndex % 2 === 0;
             const isBottomRow = rowIndex === numRows - 1; // Bottom row (at eaves) is half height
+            const isTopRow = rowIndex === 0; // Top row may be cut to fit remaining space
             let currentX = offsetX;
             
             // Apply offset for odd rows
@@ -142,20 +143,25 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Calculate Y position for this row (building from bottom up)
             let currentY;
+            let visibleHeight;
+            
             if (isBottomRow) {
                 // Bottom row at eaves
                 currentY = offsetY + scaledRoofHeight - bottomRowHeight;
+                visibleHeight = bottomRowHeight;
+            } else if (isTopRow) {
+                // Top row starts at the very top of the roof and fills remaining space
+                currentY = offsetY;
+                // Calculate how much space is left from the top
+                const rowsFromBottom = numRows - 1;
+                const heightUsedByLowerRows = bottomRowHeight + (rowsFromBottom - 1) * bottomRowHeight;
+                visibleHeight = Math.min(bottomRowHeight, scaledRoofHeight - heightUsedByLowerRows);
             } else {
-                // Each row overlaps previous by half shingle height
-                // Distance from bottom = bottomRowHeight + (numRows - 1 - rowIndex) * (shingleHeight / 2)
+                // Regular rows in between
                 const rowsFromBottom = numRows - 1 - rowIndex;
                 currentY = offsetY + scaledRoofHeight - bottomRowHeight - (rowsFromBottom * bottomRowHeight);
+                visibleHeight = bottomRowHeight;
             }
-            
-            // Visible height for this row
-            // Bottom row: full half height visible
-            // Other rows: only the exposed half is visible (bottom half with tabs)
-            const visibleHeight = isBottomRow ? bottomRowHeight : bottomRowHeight;
             
             // Draw shingles in this row
             let shingleIndex = 0;

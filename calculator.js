@@ -154,15 +154,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 visibleHeight = bottomRowHeight;
             } else {
                 // Regular rows - each row is positioned based on cumulative exposed height
-                // Row 1 (bottom) exposes: bottomRowHeight - scaledOverlapHeight
+                // Row 1 (bottom) exposes: bottomRowHeight (full half shingle)
                 // Row 2+ each exposes: effectiveShingleHeight
-                const bottomExposed = bottomRowHeight - scaledOverlapHeight;
-                const cumulativeExposed = bottomExposed + rowsFromBottom * effectiveShingleHeight;
+                const cumulativeExposed = bottomRowHeight + rowsFromBottom * effectiveShingleHeight;
                 
                 if (isTopRow) {
                     // Top row - fill remaining space
                     currentY = offsetY;
-                    visibleHeight = Math.min(effectiveShingleHeight, scaledRoofHeight - (bottomExposed + (numRows - 2) * effectiveShingleHeight));
+                    visibleHeight = Math.min(effectiveShingleHeight, scaledRoofHeight - (bottomRowHeight + (numRows - 2) * effectiveShingleHeight));
                 } else {
                     // Regular middle rows
                     currentY = offsetY + scaledRoofHeight - cumulativeExposed - effectiveShingleHeight;

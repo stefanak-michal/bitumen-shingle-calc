@@ -1,118 +1,168 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+  <title>Bitumen Shingle Calculator</title>
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bitumen Shingle Calculator</title>
+  <meta name="description"
+    content="Free online calculator for estimating the number of bitumen shingles needed to cover one or more rectangular roof areas. Includes accurate canvas visualization of the shingle layout." />
+  <meta name="author" content="Michal Stefanak" />
+  <meta name="keywords" content="bitumen shingle calculator, roof shingles, shingle estimator, roofing calculator" />
+  <link rel="canonical" href="https://stefanak-michal.github.io/bitumen-shingle-calc/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Bitumen Shingle Calculator" />
+  <meta property="og:description"
+    content="Estimate the number of bitumen shingles needed for your roof, with a visual layout diagram." />
+  <meta property="og:url" content="https://stefanak-michal.github.io/bitumen-shingle-calc/" />
+
   <link rel="stylesheet" href="styles.css" />
-  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://code.jquery.com/jquery-4.0.0.slim.min.js"
+    integrity="sha256-8DGpv13HIm+5iDNWw1XqxgFB4mj+yOKFNb+tHBZOowc=" crossorigin="anonymous"></script>
 </head>
+
 <body>
 
-<header class="page-header">
-  <h1>Bitumen Shingle Calculator</h1>
-</header>
+  <header class="page-header">
+    <h1>Bitumen Shingle Calculator</h1>
+    <a class="github-link" href="https://github.com/stefanak-michal/bitumen-shingle-calc" target="_blank"
+      rel="noopener noreferrer" aria-label="View source on GitHub">
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="currentColor"
+        aria-hidden="true">
+        <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577
+          0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.333-1.754-1.333-1.754
+          -1.089-.745.083-.729.083-.729 1.205.085 1.84 1.237 1.84 1.237 1.07 1.834 2.807 1.304
+          3.492.997.108-.775.418-1.305.762-1.605-2.665-.3-5.467-1.332-5.467-5.93
+          0-1.31.468-2.382 1.235-3.22-.124-.303-.535-1.523.117-3.176
+          0 0 1.008-.322 3.3 1.23a11.5 11.5 0 0 1 3.003-.404
+          c1.02.005 2.047.138 3.003.404 2.29-1.552 3.297-1.23 3.297-1.23
+          .653 1.653.242 2.873.118 3.176.77.838 1.233 1.91 1.233 3.22
+          0 4.61-2.807 5.625-5.48 5.92.43.372.823 1.102.823 2.222
+          0 1.606-.015 2.898-.015 3.293 0 .322.216.694.825.576
+          C20.565 21.796 24 17.298 24 12c0-6.63-5.37-12-12-12z" />
+      </svg>
+    </a>
+  </header>
 
-<div class="container">
+  <div class="container">
 
-  <!-- ── Input panel ───────────────────────────────────────────── -->
-  <section class="panel" id="input-panel">
-    <div class="panel-title">Roof Areas</div>
-    <div class="panel-body">
-      <div id="area-list">
-        <!-- area rows injected by JS -->
-      </div>
-      <div class="action-bar">
-        <button class="btn btn-secondary" id="btn-add-area">&#43; Add Roof Area</button>
-        <button class="btn btn-primary"   id="btn-calculate">Calculate</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── Shingle size panel (accordion, default folded) ───────── -->
-  <section class="panel" id="shingle-panel">
-    <button class="panel-title accordion-toggle" id="shingle-toggle" aria-expanded="false" aria-controls="shingle-body">
-      Shingle Size
-      <span class="accordion-icon">&#9656;</span>
-    </button>
-    <div class="panel-body accordion-body" id="shingle-body" hidden>
-      <div class="shingle-fields">
-        <div class="shingle-field">
-          <label for="input-shingle-width">Shingle total width</label>
-          <input type="number" id="input-shingle-width" min="10" step="1" value="1000" aria-label="Shingle width in mm" />
-          <span class="unit-label">mm</span>
+    <!-- ── Input panel ───────────────────────────────────────────── -->
+    <section class="panel" id="input-panel">
+      <div class="panel-title">Roof Areas</div>
+      <div class="panel-body">
+        <div id="area-list">
+          <!-- area rows injected by JS -->
         </div>
-        <div class="shingle-field">
-          <label for="input-shingle-height">Shingle total height</label>
-          <input type="number" id="input-shingle-height" min="10" step="1" value="333" aria-label="Shingle height in mm" />
-          <span class="unit-label">mm</span>
-        </div>
-        <div class="shingle-field">
-          <label for="input-exposure-height">Exposure height (vertical overlap)</label>
-          <input type="number" id="input-exposure-height" min="1" step="1" value="180" aria-label="Exposure height in mm" />
-          <span class="unit-label">mm</span>
-        </div>
-        <div class="shingle-field">
-          <label for="input-tab-height">Tab height</label>
-          <input type="number" id="input-tab-height" min="1" step="1" value="143" aria-label="Tab height in mm" />
-          <span class="unit-label">mm</span>
-        </div>
-        <div class="shingle-field">
-          <label for="input-tab-count">Tab count</label>
-          <input type="number" id="input-tab-count" min="1" step="1" value="4" aria-label="Number of tabs" />
-          <span class="unit-label"></span>
-        </div>
-        <div class="shingle-field">
-          <label for="input-tab-width">Tab width</label>
-          <input type="number" id="input-tab-width" min="1" step="1" value="242" aria-label="Tab width in mm" />
-          <span class="unit-label">mm</span>
+        <div class="action-bar">
+          <button class="btn btn-secondary" id="btn-add-area">&#43; Add Roof Area</button>
+          <button class="btn btn-primary" id="btn-calculate">Calculate</button>
         </div>
       </div>
-      <div class="shingle-actions">
-        <button class="btn btn-secondary" id="btn-reset-shingle">Reset to defaults</button>
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ── Results panel ─────────────────────────────────────────── -->
-  <section class="panel" id="results-section">
-    <div class="panel-title">Results</div>
-    <div class="panel-body">
-      <table class="results-table" id="results-table">
-        <thead>
-          <tr>
-            <th>Area name</th>
-            <th>Width (mm)</th>
-            <th>Height (mm)</th>
-            <th>Rows</th>
-            <th>Shingles</th>
-          </tr>
-        </thead>
-        <tbody id="results-tbody"></tbody>
-      </table>
-    </div>
-  </section>
-
-  <!-- ── Visualization panel ───────────────────────────────────── -->
-  <section class="panel" id="viz-section">
-    <div class="panel-title">Visualization</div>
-    <div class="panel-body">
-      <div id="viz-container"></div>
-      <div class="legend">
-        <div class="legend-item">
-          <span class="legend-swatch" style="background:var(--color-shingle-dark)"></span>
-          Shingle (odd rows)
+    <!-- ── Shingle size panel (accordion, default folded) ───────── -->
+    <section class="panel" id="shingle-panel">
+      <button class="panel-title accordion-toggle" id="shingle-toggle" aria-expanded="false"
+        aria-controls="shingle-body">
+        Shingle Size
+        <span class="accordion-icon">&#9656;</span>
+      </button>
+      <div class="panel-body accordion-body" id="shingle-body" hidden>
+        <div class="shingle-fields">
+          <div class="shingle-field">
+            <label for="input-shingle-width">Shingle total width</label>
+            <input type="number" id="input-shingle-width" min="10" step="1" value="1000"
+              aria-label="Shingle width in mm" />
+            <span class="unit-label">mm</span>
+          </div>
+          <div class="shingle-field">
+            <label for="input-shingle-height">Shingle total height</label>
+            <input type="number" id="input-shingle-height" min="10" step="1" value="333"
+              aria-label="Shingle height in mm" />
+            <span class="unit-label">mm</span>
+          </div>
+          <div class="shingle-field">
+            <label for="input-exposure-height">Exposure height (vertical overlap)</label>
+            <input type="number" id="input-exposure-height" min="1" step="1" value="180"
+              aria-label="Exposure height in mm" />
+            <span class="unit-label">mm</span>
+          </div>
+          <div class="shingle-field">
+            <label for="input-tab-height">Tab height</label>
+            <input type="number" id="input-tab-height" min="1" step="1" value="143" aria-label="Tab height in mm" />
+            <span class="unit-label">mm</span>
+          </div>
+          <div class="shingle-field">
+            <label for="input-tab-count">Tab count</label>
+            <input type="number" id="input-tab-count" min="1" step="1" value="4" aria-label="Number of tabs" />
+            <span class="unit-label"></span>
+          </div>
+          <div class="shingle-field">
+            <label for="input-tab-width">Tab width</label>
+            <input type="number" id="input-tab-width" min="1" step="1" value="242" aria-label="Tab width in mm" />
+            <span class="unit-label">mm</span>
+          </div>
         </div>
-        <div class="legend-item">
-          <span class="legend-swatch" style="background:var(--color-shingle-mid)"></span>
-          Shingle (even rows)
+        <div class="shingle-actions">
+          <button class="btn btn-secondary" id="btn-reset-shingle">Reset to defaults</button>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-</div><!-- /container -->
+    <!-- ── Results panel ─────────────────────────────────────────── -->
+    <section class="panel" id="results-section">
+      <div class="panel-title">Results</div>
+      <div class="panel-body">
+        <table class="results-table" id="results-table">
+          <thead>
+            <tr>
+              <th>Area name</th>
+              <th>Width (mm)</th>
+              <th>Height (mm)</th>
+              <th>Rows</th>
+              <th>Shingles</th>
+            </tr>
+          </thead>
+          <tbody id="results-tbody"></tbody>
+        </table>
+      </div>
+    </section>
 
-<script src="calculator.js"></script>
+    <!-- ── Visualization panel ───────────────────────────────────── -->
+    <section class="panel" id="viz-section">
+      <div class="panel-title">Visualization</div>
+      <div class="panel-body">
+        <div id="viz-container"></div>
+        <div class="legend">
+          <div class="legend-item">
+            <span class="legend-swatch" style="background:var(--color-shingle-dark)"></span>
+            Shingle (odd rows)
+          </div>
+          <div class="legend-item">
+            <span class="legend-swatch" style="background:var(--color-shingle-mid)"></span>
+            Shingle (even rows)
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div><!-- /container -->
+
+  <script src="calculator.js"></script>
+
+  <script src="https://storage.ko-fi.com/cdn/scripts/overlay-widget.js"></script>
+  <script>
+    kofiWidgetOverlay.draw('michalstefanak', {
+      type: 'floating-chat',
+      'floating-chat.donateButton.text': 'Support me',
+      'floating-chat.donateButton.background-color': '#429e4e',
+      'floating-chat.donateButton.text-color': '#fff',
+    });
+  </script>
+
 </body>
+
 </html>

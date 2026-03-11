@@ -29,6 +29,51 @@
     </div>
   </section>
 
+  <!-- ── Shingle size panel (accordion, default folded) ───────── -->
+  <section class="panel" id="shingle-panel">
+    <button class="panel-title accordion-toggle" id="shingle-toggle" aria-expanded="false" aria-controls="shingle-body">
+      Shingle Size
+      <span class="accordion-icon">&#9656;</span>
+    </button>
+    <div class="panel-body accordion-body" id="shingle-body" hidden>
+      <div class="shingle-fields">
+        <div class="shingle-field">
+          <label for="input-shingle-width">Shingle total width</label>
+          <input type="number" id="input-shingle-width" min="10" step="1" value="1000" aria-label="Shingle width in mm" />
+          <span class="unit-label">mm</span>
+        </div>
+        <div class="shingle-field">
+          <label for="input-shingle-height">Shingle total height</label>
+          <input type="number" id="input-shingle-height" min="10" step="1" value="333" aria-label="Shingle height in mm" />
+          <span class="unit-label">mm</span>
+        </div>
+        <div class="shingle-field">
+          <label for="input-exposure-height">Exposure height (vertical overlap)</label>
+          <input type="number" id="input-exposure-height" min="1" step="1" value="180" aria-label="Exposure height in mm" />
+          <span class="unit-label">mm</span>
+        </div>
+        <div class="shingle-field">
+          <label for="input-tab-height">Tab height</label>
+          <input type="number" id="input-tab-height" min="1" step="1" value="143" aria-label="Tab height in mm" />
+          <span class="unit-label">mm</span>
+        </div>
+        <div class="shingle-field">
+          <label for="input-tab-count">Tab count</label>
+          <input type="number" id="input-tab-count" min="1" step="1" value="4" aria-label="Number of tabs" />
+          <span class="unit-label"></span>
+        </div>
+        <div class="shingle-field">
+          <label for="input-tab-width">Tab width</label>
+          <input type="number" id="input-tab-width" min="1" step="1" value="242" aria-label="Tab width in mm" />
+          <span class="unit-label">mm</span>
+        </div>
+      </div>
+      <div class="shingle-actions">
+        <button class="btn btn-secondary" id="btn-reset-shingle">Reset to defaults</button>
+      </div>
+    </div>
+  </section>
+
   <!-- ── Results panel ─────────────────────────────────────────── -->
   <section class="panel" id="results-section">
     <div class="panel-title">Results</div>

@@ -1,17 +1,48 @@
 $(function () {
 
   /* ═══════════════════════════════════════════════════════════════
-     SHINGLE CONSTANTS  (4TAB profile, all dimensions in mm)
+     SHINGLE DIMENSIONS  (read from user inputs at calculation time)
   ═══════════════════════════════════════════════════════════════ */
-  const SHINGLE_WIDTH    = 1000;  // total shingle width
-  const SHINGLE_HEIGHT   = 333;   // total shingle height
-  const EXPOSURE_HEIGHT  = 180;   // upper solid band — exposed per row
-  const TAB_HEIGHT       = 143;   // lower tab section height
-  const TAB_COUNT        = 4;     // number of tabs
-  const TAB_WIDTH        = 242;   // width of one tab (mm)
-  // 4 tabs × 242 = 968 mm; remaining 32 mm split across 3 gaps
-  const GAP_WIDTH        = (SHINGLE_WIDTH - TAB_COUNT * TAB_WIDTH) / (TAB_COUNT - 1); // ≈10.67 mm
-  const ROW_OFFSET       = 121;   // horizontal shift on every 2nd row (half tab width)
+
+  /**
+   * Read current shingle dimension values from the Shingle Size panel.
+   * Returns an object with all constants needed for calculation and rendering.
+   */
+  function getShingleDims() {
+    const SHINGLE_WIDTH   = parseInt($('#input-shingle-width').val(),  10) || 1000;
+    const SHINGLE_HEIGHT  = parseInt($('#input-shingle-height').val(), 10) || 333;
+    const EXPOSURE_HEIGHT = parseInt($('#input-exposure-height').val(),10) || 180;
+    const TAB_HEIGHT      = parseInt($('#input-tab-height').val(),     10) || 143;
+    const TAB_COUNT       = parseInt($('#input-tab-count').val(),      10) || 4;
+    const TAB_WIDTH       = parseInt($('#input-tab-width').val(),      10) || 242;
+    const ROW_OFFSET      = Math.round(TAB_WIDTH / 2); // always half of tab width
+    const GAP_WIDTH       = TAB_COUNT > 1
+      ? (SHINGLE_WIDTH - TAB_COUNT * TAB_WIDTH) / (TAB_COUNT - 1)
+      : 0;
+    return { SHINGLE_WIDTH, SHINGLE_HEIGHT, EXPOSURE_HEIGHT, TAB_HEIGHT, TAB_COUNT, TAB_WIDTH, ROW_OFFSET, GAP_WIDTH };
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     ACCORDION — Shingle Size panel
+  ═══════════════════════════════════════════════════════════════ */
+  $('#shingle-toggle').on('click', function () {
+    const $btn  = $(this);
+    const $body = $('#shingle-body');
+    const open  = $btn.attr('aria-expanded') === 'true';
+    $btn.attr('aria-expanded', String(!open));
+    if (open) {
+      $body.attr('hidden', '');
+    } else {
+      $body.removeAttr('hidden');
+    }
+  });
+
+  // Reset shingle size inputs to their default (HTML value attribute) values
+  $('#btn-reset-shingle').on('click', function () {
+    $('#shingle-body input').each(function () {
+      this.value = this.defaultValue;
+    });
+  });
 
   /* ═══════════════════════════════════════════════════════════════
      STATE
@@ -34,7 +65,8 @@ $(function () {
    *   visibleHeight = how many mm of this row are visible (all rows = EXPOSURE_HEIGHT
    *                   except last row which may be less if roof height isn't a multiple)
    */
-  function calculateArea(roofWidth, roofHeight) {
+  function calculateArea(roofWidth, roofHeight, dims) {
+    const { EXPOSURE_HEIGHT, ROW_OFFSET, SHINGLE_WIDTH } = dims;
     const totalRows = Math.ceil(roofHeight / EXPOSURE_HEIGHT);
     const rows = [];
     let totalShingles = 0;
@@ -220,7 +252,8 @@ $(function () {
    * @param {string}  fill    — shingle body fill color (hex)
    * @param {boolean} isRow1  — true for row 1: draw only the upper solid band, no tabs
    */
-  function drawShingle(ctx, x, y, totalW, drawH, scale, fill, isRow1) {
+  function drawShingle(ctx, x, y, totalW, drawH, scale, fill, isRow1, dims) {
+    const { EXPOSURE_HEIGHT, TAB_COUNT, TAB_WIDTH, GAP_WIDTH } = dims;
     const solidH = EXPOSURE_HEIGHT * scale; // upper solid band height in px
 
     if (isRow1) {
@@ -314,20 +347,11 @@ $(function () {
    * @param {number} canvasH   — canvas height in px
    * @param {number} scale     — mm → px
    */
-  function drawRow(ctx, row, roofWidth, canvasH, scale) {
+  function drawRow(ctx, row, roofWidth, canvasH, scale, dims) {
     const { rowNum, isOffset } = row;
+    const { EXPOSURE_HEIGHT, SHINGLE_WIDTH, SHINGLE_HEIGHT, ROW_OFFSET } = dims;
 
-    // The exposure zone for this row:
-    //   bottom = canvasH - rowNum * EXPOSURE_HEIGHT * scale
-    //   top    = bottom  - (SHINGLE_HEIGHT - EXPOSURE_HEIGHT) * scale  [for full shingles]
-    //
-    // Row 1 (bottom): cut shingle, drawn flush at canvas bottom, height = EXPOSURE_HEIGHT.
-    // Full shingles: anchored so their solid band top aligns with exposureTopPx.
-    //   exposureTopPx = canvasH - rowNum * EXPOSURE_HEIGHT * scale
-    //   shingleY      = exposureTopPx  (top of solid band = top of shingle)
-    //   drawH         = SHINGLE_HEIGHT * scale  (tabs hang downward, clipped by row below)
-
-    const fill = (rowNum % 2 === 0) ? '#4a4a4a' : '#3a3a3a';
+    const fill   = (rowNum % 2 === 0) ? '#4a4a4a' : '#3a3a3a';
     const isRow1 = (rowNum === 1);
 
     // Top of the exposure band for this row in canvas px
@@ -340,15 +364,15 @@ $(function () {
         const shingleX = s * SHINGLE_WIDTH * scale;
 
         if (isRow1) {
-          // Row 1: cut shingle — only the 190mm solid band, flush at canvas bottom
+          // Row 1: cut shingle — only the solid band, flush at canvas bottom
           const shingleY = canvasH - EXPOSURE_HEIGHT * scale;
           const drawH    = EXPOSURE_HEIGHT * scale;
-          drawShingle(ctx, shingleX, shingleY, SHINGLE_WIDTH * scale, drawH, scale, fill, true);
+          drawShingle(ctx, shingleX, shingleY, SHINGLE_WIDTH * scale, drawH, scale, fill, true, dims);
         } else {
           // Full shingle: top of shingle = top of exposure band; tabs hang below
           const shingleY = exposureTopPx;
           const drawH    = SHINGLE_HEIGHT * scale;
-          drawShingle(ctx, shingleX, shingleY, SHINGLE_WIDTH * scale, drawH, scale, fill, false);
+          drawShingle(ctx, shingleX, shingleY, SHINGLE_WIDTH * scale, drawH, scale, fill, false, dims);
         }
       }
 
@@ -366,7 +390,7 @@ $(function () {
         const visLeftMm  = Math.max(shingleOriginMm, 0);
         if (visRightMm - visLeftMm <= 0) continue;
 
-        drawShingle(ctx, shingleX, shingleY, SHINGLE_WIDTH * scale, drawH, scale, fill, false);
+        drawShingle(ctx, shingleX, shingleY, SHINGLE_WIDTH * scale, drawH, scale, fill, false, dims);
 
         // Cut line at left canvas edge: right-piece of the split shingle (s=0)
         if (s === 0 && ROW_OFFSET > 0) {
@@ -391,7 +415,7 @@ $(function () {
    * @param {object} calcResult    — from calculateArea()
    * @param {number} availableWidth — container width in px (used for scaling)
    */
-  function renderRoof(canvas, roofWidth, roofHeight, calcResult, availableWidth) {
+  function renderRoof(canvas, roofWidth, roofHeight, calcResult, availableWidth, dims) {
     const MAX_CANVAS_WIDTH = 900;
     const scale   = Math.min(MAX_CANVAS_WIDTH, availableWidth) / roofWidth;
     const canvasW = Math.round(roofWidth  * scale);
@@ -416,7 +440,7 @@ $(function () {
     // Each row's solid band paints over the tabs of the row below it,
     // so tabs are visible between the solid bands — correct overlap behaviour.
     for (let i = 0; i < calcResult.rows.length; i++) {
-      drawRow(ctx, calcResult.rows[i], roofWidth, canvasH, scale);
+      drawRow(ctx, calcResult.rows[i], roofWidth, canvasH, scale, dims);
     }
 
     ctx.restore();
@@ -433,7 +457,7 @@ $(function () {
    * @param {Array} areas   — [{ name, width, height }]
    * @param {Array} results — [{ totalRows, totalShingles, rows }]
    */
-  function renderVisualization(areas, results) {
+  function renderVisualization(areas, results, dims) {
     const $container = $('#viz-container').empty();
 
     // Show the section first so the panel-body has a real layout width to measure.
@@ -462,7 +486,7 @@ $(function () {
       $container.append($wrap);
 
       const canvas = document.getElementById(canvasId);
-      renderRoof(canvas, area.width, area.height, r, availableWidth);
+      renderRoof(canvas, area.width, area.height, r, availableWidth, dims);
     });
   }
 
@@ -473,10 +497,11 @@ $(function () {
     const areas = collectAreas();
     if (!areas) return; // validation failed — errors shown inline
 
-    const results = areas.map(a => calculateArea(a.width, a.height));
+    const dims    = getShingleDims();
+    const results = areas.map(a => calculateArea(a.width, a.height, dims));
 
     renderResultsTable(areas, results);
-    renderVisualization(areas, results);
+    renderVisualization(areas, results, dims);
 
     // Smooth scroll to results
     $('html, body').animate({ scrollTop: $('#results-section').offset().top - 20 }, 300);

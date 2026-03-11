@@ -76,6 +76,62 @@ body {
 }
 .panel-body { padding: 20px; }
 
+/* ── Accordion ─────────────────────────────────────────────── */
+button.accordion-toggle {
+  width: 100%;
+  text-align: left;
+  background: var(--color-accent);
+  border: none;
+  border-bottom: 1px solid transparent;
+  padding: 12px 20px;
+  font-weight: 700;
+  font-size: 0.92rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+button.accordion-toggle:hover { background: var(--color-accent-hover); }
+button.accordion-toggle[aria-expanded="true"] {
+  border-bottom-color: #ddd;
+}
+.accordion-icon {
+  display: inline-block;
+  transition: transform 0.2s;
+  font-style: normal;
+}
+button.accordion-toggle[aria-expanded="true"] .accordion-icon {
+  transform: rotate(90deg);
+}
+.accordion-body[hidden] { display: none; }
+
+/* ── Shingle size fields ───────────────────────────────────── */
+.shingle-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 32px;
+}
+.shingle-field {
+  display: grid;
+  grid-template-columns: 0.75fr 100px 30px;
+  align-items: center;
+  gap: 8px;
+}
+.shingle-field label {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+.shingle-field input { width: 80px; }
+.shingle-actions { margin-top: 16px; }
+
+@media (max-width: 600px) {
+  .shingle-fields { grid-template-columns: 1fr; }
+}
+
 /* ── Area input rows ───────────────────────────────────────── */
 #area-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
 

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bitumen Shingle Calculator</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+</head>
+<body>
+
+<header class="page-header">
+  <h1>Bitumen Shingle Calculator</h1>
+  <p>4TAB profile &mdash; 1000 &times; 333 mm shingles, 190 mm exposure</p>
+</header>
+
+<div class="container">
+
+  <!-- ── Input panel ───────────────────────────────────────────── -->
+  <section class="panel" id="input-panel">
+    <div class="panel-title">Roof Areas</div>
+    <div class="panel-body">
+      <div id="area-list">
+        <!-- area rows injected by JS -->
+      </div>
+      <div class="action-bar">
+        <button class="btn btn-secondary" id="btn-add-area">&#43; Add Roof Area</button>
+        <button class="btn btn-primary"   id="btn-calculate">Calculate</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Results panel ─────────────────────────────────────────── -->
+  <section class="panel" id="results-section">
+    <div class="panel-title">Results</div>
+    <div class="panel-body">
+      <table class="results-table" id="results-table">
+        <thead>
+          <tr>
+            <th>Area name</th>
+            <th>Width (mm)</th>
+            <th>Height (mm)</th>
+            <th>Rows</th>
+            <th>Shingles</th>
+          </tr>
+        </thead>
+        <tbody id="results-tbody"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ── Visualization panel ───────────────────────────────────── -->
+  <section class="panel" id="viz-section">
+    <div class="panel-title">Visualization</div>
+    <div class="panel-body">
+      <div id="viz-container"></div>
+      <div class="legend">
+        <div class="legend-item">
+          <span class="legend-swatch" style="background:var(--color-shingle-dark)"></span>
+          Shingle (odd rows)
+        </div>
+        <div class="legend-item">
+          <span class="legend-swatch" style="background:var(--color-shingle-mid)"></span>
+          Shingle (even rows)
+        </div>
+        <div class="legend-item">
+          <span class="legend-cut-line"></span>
+          Cut edge
+        </div>
+        <div class="legend-item">
+          <span class="legend-swatch" style="background:var(--color-roof-bg);border-color:#999"></span>
+          Roof background / gaps
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div><!-- /container -->
+
+<script src="calculator.js"></script>
+</body>
+</html>

@@ -7,8 +7,8 @@
   --color-border:         #222222;
   --color-page-bg:        #f4f1ec;
   --color-panel-bg:       #ffffff;
-  --color-accent:         #c0392b;
-  --color-accent-hover:   #a93226;
+  --color-accent:         #429e4e;
+  --color-accent-hover:   #4bbb59;
   --color-text:           #1a1a1a;
   --color-text-muted:     #666666;
   --color-success:        #27ae60;
@@ -35,7 +35,7 @@ body {
 .page-header {
   background: var(--color-table-head);
   color: #fff;
-  padding: 22px 32px;
+  padding: 6px 32px;
   border-bottom: 4px solid var(--color-accent);
 }
 .page-header h1 {
@@ -53,7 +53,7 @@ body {
 .container {
   max-width: 980px;
   margin: 0 auto;
-  padding: 28px 20px 60px;
+  padding: 12px 20px;
 }
 
 /* ── Panels ────────────────────────────────────────────────── */
@@ -61,18 +61,18 @@ body {
   background: var(--color-panel-bg);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  margin-bottom: 28px;
+  margin-bottom: 12px;
   overflow: hidden;
 }
 .panel-title {
-  background: #f0ede8;
+  background: var(--color-accent);
   border-bottom: 1px solid #ddd;
   padding: 12px 20px;
   font-weight: 700;
   font-size: 0.92rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: #444;
+  color: #fff;
 }
 .panel-body { padding: 20px; }
 
@@ -116,7 +116,7 @@ input[type="number"].input-error {
 }
 
 .area-name-wrap input { max-width: 180px; }
-.dim-wrap input       { width: 90px; }
+.dim-wrap input       { width: 120px; }
 
 .unit-label {
   font-size: 0.80rem;

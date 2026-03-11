@@ -5,7 +5,7 @@ $(function () {
   ═══════════════════════════════════════════════════════════════ */
   const SHINGLE_WIDTH    = 1000;  // total shingle width
   const SHINGLE_HEIGHT   = 333;   // total shingle height
-  const EXPOSURE_HEIGHT  = 190;   // upper solid band — exposed per row
+  const EXPOSURE_HEIGHT  = 180;   // upper solid band — exposed per row
   const TAB_HEIGHT       = 143;   // lower tab section height
   const TAB_COUNT        = 4;     // number of tabs
   const TAB_WIDTH        = 242;   // width of one tab (mm)
@@ -80,12 +80,12 @@ $(function () {
         </div>
         <div class="dim-wrap">
           <label for="w-${id}">Width</label>
-          <input type="number" id="w-${id}" class="area-width" min="1" placeholder="e.g. 5000" aria-label="Width in mm" />
+          <input type="number" id="w-${id}" class="area-width" min="1" step="1" placeholder="e.g. 5000" aria-label="Width in mm" />
           <span class="unit-label">mm</span>
         </div>
         <div class="dim-wrap">
           <label for="h-${id}">Height</label>
-          <input type="number" id="h-${id}" class="area-height" min="1" placeholder="e.g. 3000" aria-label="Height in mm" />
+          <input type="number" id="h-${id}" class="area-height" min="1" step="1" placeholder="e.g. 3000" aria-label="Height in mm" />
           <span class="unit-label">mm</span>
         </div>
         <button class="btn btn-remove remove-area" aria-label="Remove area">&times;</button>
@@ -131,7 +131,6 @@ $(function () {
 
     if (raw === '' || isNaN(val) || val < 1) {
       $input.addClass('input-error');
-      $input.after(`<span class="error-msg">${label} must be a positive number</span>`);
       return null;
     }
     return val;
@@ -248,8 +247,9 @@ $(function () {
       ctx.stroke();
 
       // 2. Tab section — 4 tabs with gaps between them left transparent
-      const tabY = y + solidH;
-      const tabH = drawH - solidH; // remaining height for tabs (may be clipped for last row)
+      // Start 1px above the solid-band bottom so the fills overlap and no gap appears
+      const tabY = y + solidH - 1;
+      const tabH = drawH - solidH + 1; // remaining height for tabs (may be clipped for last row)
 
       if (tabH > 0) {
         for (let t = 0; t < TAB_COUNT; t++) {
@@ -263,9 +263,16 @@ $(function () {
 
           ctx.fillStyle = fill;
           ctx.fillRect(tabX1, tabY, tabX2 - tabX1, tabH);
+          // Stroke left, bottom, right only — no top edge, so there is no
+          // horizontal line at the solid-band/tab boundary
           ctx.strokeStyle = '#222';
           ctx.lineWidth = 0.5;
-          ctx.strokeRect(tabX1 + 0.25, tabY + 0.25, tabX2 - tabX1 - 0.5, tabH - 0.5);
+          ctx.beginPath();
+          ctx.moveTo(tabX1 + 0.25, tabY);
+          ctx.lineTo(tabX1 + 0.25, tabY + tabH - 0.25);  // left edge down
+          ctx.lineTo(tabX2 - 0.25, tabY + tabH - 0.25);  // bottom edge across
+          ctx.lineTo(tabX2 - 0.25, tabY);                 // right edge up
+          ctx.stroke();
         }
       }
     }

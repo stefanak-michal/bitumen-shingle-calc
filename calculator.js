@@ -1,6 +1,72 @@
 $(function () {
 
   /* ═══════════════════════════════════════════════════════════════
+     LOCAL STORAGE  — persist and restore all inputs
+  ═══════════════════════════════════════════════════════════════ */
+  const LS_SHINGLE_KEY = 'bsc_shingle';
+  const LS_AREAS_KEY   = 'bsc_areas';
+
+  /** Save shingle panel inputs to localStorage. */
+  function saveShingle() {
+    const data = {};
+    $('#shingle-body input').each(function () {
+      data[this.id] = this.value;
+    });
+    try { localStorage.setItem(LS_SHINGLE_KEY, JSON.stringify(data)); } catch (_) {}
+  }
+
+  /** Save all area rows to localStorage. */
+  function saveAreas() {
+    const rows = [];
+    $areaList.find('.area-row').each(function () {
+      const $row = $(this);
+      rows.push({
+        name:   $row.find('.area-name').val(),
+        width:  $row.find('.area-width').val(),
+        height: $row.find('.area-height').val(),
+      });
+    });
+    try { localStorage.setItem(LS_AREAS_KEY, JSON.stringify(rows)); } catch (_) {}
+  }
+
+  /** Restore shingle panel inputs from localStorage. Returns true if data was found. */
+  function restoreShingle() {
+    try {
+      const raw = localStorage.getItem(LS_SHINGLE_KEY);
+      if (!raw) return false;
+      const data = JSON.parse(raw);
+      $('#shingle-body input').each(function () {
+        if (data[this.id] !== undefined) this.value = data[this.id];
+      });
+      return true;
+    } catch (_) { return false; }
+  }
+
+  /** Restore area rows from localStorage. Returns true if data was found. */
+  function restoreAreas() {
+    try {
+      const raw = localStorage.getItem(LS_AREAS_KEY);
+      if (!raw) return false;
+      const rows = JSON.parse(raw);
+      if (!Array.isArray(rows) || rows.length === 0) return false;
+
+      // Remove the default row that was created on startup
+      $areaList.find('.area-row').remove();
+      areaCounter = 0;
+
+      rows.forEach(row => {
+        addAreaRow();
+        const $last = $areaList.find('.area-row').last();
+        $last.find('.area-name').val(row.name);
+        $last.find('.area-width').val(row.width);
+        $last.find('.area-height').val(row.height);
+      });
+      updateRemoveButtons();
+      return true;
+    } catch (_) { return false; }
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
      SHINGLE DIMENSIONS  (read from user inputs at calculation time)
   ═══════════════════════════════════════════════════════════════ */
 
@@ -42,6 +108,7 @@ $(function () {
     $('#shingle-body input').each(function () {
       this.value = this.defaultValue;
     });
+    saveShingle();
   });
 
   /* ═══════════════════════════════════════════════════════════════
@@ -127,18 +194,26 @@ $(function () {
     $areaList.append($row);
   }
 
-  // Start with one area row by default
+  /** Show remove buttons only when there is more than one area row. */
+  function updateRemoveButtons() {
+    const multiple = $areaList.find('.area-row').length > 1;
+    $areaList.find('.remove-area').toggle(multiple);
+  }
+
+  // Start with one area row by default — will be replaced by restoreAreas() if data exists
   addAreaRow();
+  updateRemoveButtons();
 
   // Add area button
-  $('#btn-add-area').on('click', () => addAreaRow());
+  $('#btn-add-area').on('click', () => { addAreaRow(); updateRemoveButtons(); });
 
   // Remove area — event delegation for dynamically added rows
   $(document).on('click', '.remove-area', function () {
     const $row = $(this).closest('.area-row');
-    // Keep at least one row
     if ($areaList.find('.area-row').length > 1) {
       $row.remove();
+      saveAreas();
+      updateRemoveButtons();
     }
   });
 
@@ -503,6 +578,10 @@ $(function () {
     renderResultsTable(areas, results);
     renderVisualization(areas, results, dims);
 
+    // Persist inputs on successful calculation
+    saveAreas();
+    saveShingle();
+
     // Smooth scroll to results
     $('html, body').animate({ scrollTop: $('#results-section').offset().top - 20 }, 300);
   });
@@ -510,9 +589,15 @@ $(function () {
   /* ═══════════════════════════════════════════════════════════════
      CLEAR ERRORS ON INPUT
   ═══════════════════════════════════════════════════════════════ */
-  $(document).on('input', '.area-width, .area-height', function () {
+  $(document).on('input', '.area-width, .area-height, .area-name', function () {
     $(this).removeClass('input-error');
     $(this).siblings('.error-msg').remove();
   });
+
+  /* ═══════════════════════════════════════════════════════════════
+     RESTORE FROM LOCAL STORAGE  (on page load)
+  ═══════════════════════════════════════════════════════════════ */
+  restoreShingle();
+  restoreAreas();
 
 });

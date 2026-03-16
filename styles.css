@@ -54,14 +54,6 @@ body {
   letter-spacing: 0.02em;
 }
 
-.github-link {
-  color: #aaa;
-  display: flex;
-  align-items: center;
-  transition: color 0.15s;
-}
-.github-link:hover { color: #fff; }
-
 .page-header p {
   color: #aaa;
   font-size: 0.88rem;
